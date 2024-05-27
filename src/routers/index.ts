@@ -6,6 +6,6 @@ const router = express.Router();
 
 router.get('/ping', ping);
 
-router.use('/testimonies', testimonies);
+router.use('/api/v1/testimonies', testimonies);
 
 export default router;

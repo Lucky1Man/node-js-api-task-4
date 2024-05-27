@@ -3,27 +3,8 @@ import routers from './routers';
 import config from './config';
 import log4js, { Configuration } from 'log4js';
 import mongoose, { ConnectOptions } from 'mongoose';
-import Consul, { ConsulOptions } from 'consul';
-
-type EnvironmentType = 'dev' | 'prod';
-
-let env: EnvironmentType = 'prod';
-if (String(process.env.NODE_ENV).trim() === 'dev') {
-  env = 'dev';
-}
-
-const consulServer = new Consul(config.consul.server[env] as ConsulOptions);
-
-const prefix = `config/${config.consul.service.name}`;
-
-type ConsulResult = {
-	Value: string | number,
-};
-
-const getConsulValue = async (key: string) => {
-  const result: ConsulResult = await consulServer.kv.get(`${prefix}/${key}`);
-  return result?.Value;
-};
+import getConsulValue from './consul';
+import { dateInputMiddleware } from './middlewares';
 
 export default async () => {
   const app = express();
@@ -35,30 +16,17 @@ export default async () => {
 
   app.use(express.json({ limit: '1mb' }));
 
-  app.use((req, _, next) => {
-    const dateReviver = (_: string, value: unknown) => {
-      if (value && typeof value === 'string') {
-        const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
-        if (dateRegex.test(value)) {
-          return new Date(value);
-        }
-      }
-      return value;
-    };
-
-    req.body = JSON.parse(JSON.stringify(req.body), dateReviver);
-    next();
-  });
+  app.use(dateInputMiddleware);
 
   app.use('/', routers);
 
-  const port = await getConsulValue(`${env}/port`) as number;
-  const address = await getConsulValue(`${env}/address`) as string;
+  const port = await getConsulValue('/port') as number;
+  const address = await getConsulValue('/address') as string;
   app.listen(port, address, () => {
     log4js.getLogger().info(`Testimonies app listening on port ${address}:${port}`);
   });
 
-  const mongoAddress = await getConsulValue(`${env}/mongo.address`) as string;
+  const mongoAddress = await getConsulValue('/mongo.address') as string;
   await mongoose.connect(mongoAddress, {
     useNewUrlParser: true,
     useUnifiedTopology: true,

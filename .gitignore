@@ -3,6 +3,7 @@ dist
 log
 docker
 
+.vscode
 .idea
 *.sublime-project
 *.sublime-workspace
