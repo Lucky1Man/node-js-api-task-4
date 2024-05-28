@@ -11,5 +11,7 @@ export const getWitnessById = async (id: string): Promise<{ id: string }> => {
       method: "GET",
     })
   ).json();
+  // I receive a big object here as response but I decided to use only this value.
+  // Also, here I separate node.js service structure from other(Java) service structure.
   return { id: result.id };
 };
