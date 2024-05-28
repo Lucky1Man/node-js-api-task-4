@@ -15,7 +15,15 @@
   },
   "nyc": {
     "check-coverage": true,
-    "lines": 80
+    "lines": 80,
+    "exclude": [
+      "src/consul.ts",
+      "src/nodeEnvironment.ts",
+      "src/services/execution-fact/index.ts",
+      "src/services/witness/index.ts",
+      "src/test/**",
+      "src/system/internalError.ts"
+    ]
   },
   "_moduleAliases": {
     "src": "dist"

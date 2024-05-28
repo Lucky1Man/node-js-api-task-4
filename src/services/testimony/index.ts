@@ -33,6 +33,7 @@ export const getFilteredTestimonies = async (filter: TestimonyFilterDto) => {
 export const getCounts = async (
   requestCounts: TestimonyRequestCountsDto
 ): Promise<TestimonyGetCountsDto> => {
+  const notFoundIds = requestCounts.executionFactIds;
   validateCountsDto(requestCounts);
   const result = await Testimony.aggregate([
     {
@@ -45,16 +46,19 @@ export const getCounts = async (
       },
     },
   ]);
-  return result.reduce(
+  const mappedData = result.reduce(
     (
       previousValue: TestimonyGetCountsDto,
-      currentValue: { _id: string; count: number }
+      currentValue: { _id: string; count: number; }
     ) => {
+      notFoundIds.splice(notFoundIds.findIndex(id => id === currentValue._id), 1);
       previousValue[currentValue._id] = currentValue.count;
       return previousValue;
     },
     {}
   );
+  notFoundIds.forEach(id => mappedData[id] = 0);
+  return mappedData;
 };
 
 const toGetDto = (testimony: ITestimony): TestimonyGetDto => {
@@ -128,7 +132,7 @@ const validateFilter = (filter: TestimonyFilterDto) => {
   }
   if (filter.from < 0) {
     throw new InternalError({
-      message: `From must be positive: ${filter.size}.`,
+      message: `From must be positive: ${filter.from}.`,
       status: 400,
     });
   }
