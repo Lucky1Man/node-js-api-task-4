@@ -10,13 +10,13 @@ type ConsulResult = {
   Value: string | number;
 };
 
-export const getConsulValue = async (key: string) => {
+export const getGlobalConsulValue = async (key: string) => {
   const result: ConsulResult = await consulServer.kv.get(`${prefix}/${key}`);
   return result?.Value;
 };
 
 export const getConsultValueByCurrentEnvironment = async (key: string) => {
-  return getConsulValue(`${env}${key.charAt(0) === '/' ? '' : '/'}${key}`);
+  return getGlobalConsulValue(`${env}${key.charAt(0) === '/' ? '' : '/'}${key}`);
 };
 
 export default getConsultValueByCurrentEnvironment;

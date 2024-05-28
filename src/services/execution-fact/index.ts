@@ -1,4 +1,4 @@
-import { getConsulValue } from "src/consul";
+import getConsulValue from "src/consul";
 
 // Potential performance bottleneck 'await getConsulValue('execution-facts-service-address')'
 // but I left it as think it is cool to be able to change service addresses without restarting app.
